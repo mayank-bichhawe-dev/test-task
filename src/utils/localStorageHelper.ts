@@ -1,5 +1,5 @@
-'use client'
-import { Task } from "@/components/TaskForm";
+import { Task } from "@/interface/task";
+
 const localStorageKeyName = {
     tasks: "tasks"
 }

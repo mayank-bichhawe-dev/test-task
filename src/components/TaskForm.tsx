@@ -23,7 +23,7 @@ const TaskForm = ({ id }: TaskFormProps) => {
     id: 0,
     name: "",
     contributorName: "",
-    visibility: "public",
+    visibility: true,
     status: "published",
     lastUpdatedAt: "",
     logo: "",
@@ -53,53 +53,65 @@ const TaskForm = ({ id }: TaskFormProps) => {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setTask({ ...task, [name]: value });
+    setTaskError({ ...taskError, [name]: !value });
   };
 
   const handleSelectChange = (event: SelectChangeEvent<any>) => {
     const { name, value } = event.target;
-    setTask({ ...task, [name]: value });
+    if(name === 'visibility'){
+      setTask({ ...task, [name]: value === 'public'});
+    }else {
+      setTask({ ...task, [name]: value });
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] as File;
     const reader = new FileReader();
     reader.onload = () => {
-        const imgUrl = reader.result as string;
-        setTask({ ...task, logo: imgUrl });
+      const imgUrl = reader.result as string;
+      setTask({ ...task, logo: imgUrl });
     };
     reader.readAsDataURL(file);
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const { name, contributorName, visibility, status } = task;
     const error = {
-      name: !name,
-      contributorName: !contributorName,
-      logo: true,
+      name: !task.name,
+      contributorName: !task.contributorName,
+      visibility: taskError.visibility,
+      status: !task.status,
+      logo: !task.logo,
+      lastUpdatedAt: false,
     };
-    setTaskError({ ...taskError, ...error });
-    if (name && contributorName && visibility && status) {
+    setTaskError(error);
+
+    if (!Object.values(error).some(Boolean)) {
       handleLocalStorageData(task);
-      setTask({
-        id: 0,
-        name: "",
-        contributorName: "",
-        visibility: "public",
-        status: "published",
-        lastUpdatedAt: "",
-        logo: "",
-      });
-      setTaskError({
-        name: false,
-        contributorName: false,
-        visibility: false,
-        status: false,
-        lastUpdatedAt: false,
-        logo: false,
-      });
+      resetForm();
       router.push("/");
     }
+  };
+
+  const resetForm = () => {
+    setTask({
+      id: 0,
+      name: "",
+      contributorName: "",
+      visibility: true,
+      status: "published",
+      lastUpdatedAt: "",
+      logo: "",
+    });
+    setTaskError({
+      name: false,
+      contributorName: false,
+      visibility: false,
+      status: false,
+      lastUpdatedAt: false,
+      logo: false,
+    });
   };
 
   useEffect(() => {
@@ -183,7 +195,7 @@ const TaskForm = ({ id }: TaskFormProps) => {
             <Select
               label="Visibility"
               name="visibility"
-              value={task.visibility}
+              value={task.visibility ? 'public' : 'private'}
               onChange={handleSelectChange}
               renderValue={(value) => value}
             >

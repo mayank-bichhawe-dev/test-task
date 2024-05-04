@@ -36,7 +36,7 @@ export default function TaskCard({ task }: CardProps) {
         }
         title={
           <Typography fontSize={10} sx={{ float: "right" }}>
-            {task.visibility}
+            {task.visibility ? 'public': 'private'}
           </Typography>
         }
       />

@@ -2,7 +2,7 @@ export interface Task {
   id: number;
   name: string;
   contributorName: string;
-  visibility: "public" | "private";
+  visibility: boolean;
   status: "published" | "draft";
   lastUpdatedAt: string | number;
   logo: string;
