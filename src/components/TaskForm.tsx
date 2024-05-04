@@ -1,4 +1,8 @@
 import {
+  getLocalStorageData,
+  handleLocalStorageData,
+} from "@/utils/localStorageHelper";
+import {
   Box,
   Button,
   FormControl,
@@ -9,32 +13,12 @@ import {
   TextField,
   SelectChangeEvent,
 } from "@mui/material";
-import { useState, FormEvent, FormEventHandler, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { TaskFormProps, Task, TaskError } from "@/interface/task";
 
-export interface Task {
-  id: number;
-  name: string;
-  contributorName: string;
-  visibility: "public" | "private";
-  status: "published" | "draft";
-  lastUpdatedAt: string | number;
-  logo: string;
-}
-
-interface Error {
-  name: boolean;
-  contributorName: boolean;
-  visibility: boolean;
-  status: boolean;
-  lastUpdatedAt: boolean;
-  logo: boolean;
-}
-
-interface TaskFormProps {
-  handleTask: (value: Task) => void;
-}
-
-const TaskForm = ({ handleTask }: TaskFormProps) => {
+const TaskForm = ({ id }: TaskFormProps) => {
+  const router = useRouter();
   const [task, setTask] = useState<Task>({
     id: 0,
     name: "",
@@ -45,7 +29,7 @@ const TaskForm = ({ handleTask }: TaskFormProps) => {
     logo: "",
   });
 
-  const [taskError, setTaskError] = useState<Error>({
+  const [taskError, setTaskError] = useState<TaskError>({
     name: false,
     contributorName: false,
     visibility: false,
@@ -76,14 +60,27 @@ const TaskForm = ({ handleTask }: TaskFormProps) => {
     setTask({ ...task, [name]: value });
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] as File;
+    const reader = new FileReader();
+    reader.onload = () => {
+        const imgUrl = reader.result as string;
+        setTask({ ...task, logo: imgUrl });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const date = Date.now();
-    setTask({ ...task, lastUpdatedAt: date });
     const { name, contributorName, visibility, status } = task;
-
+    const error = {
+      name: !name,
+      contributorName: !contributorName,
+      logo: true,
+    };
+    setTaskError({ ...taskError, ...error });
     if (name && contributorName && visibility && status) {
-      handleTask(task);
+      handleLocalStorageData(task);
       setTask({
         id: 0,
         name: "",
@@ -93,19 +90,48 @@ const TaskForm = ({ handleTask }: TaskFormProps) => {
         lastUpdatedAt: "",
         logo: "",
       });
+      setTaskError({
+        name: false,
+        contributorName: false,
+        visibility: false,
+        status: false,
+        lastUpdatedAt: false,
+        logo: false,
+      });
+      router.push("/");
     }
   };
 
+  useEffect(() => {
+    if (id) {
+      const getLocalData = getLocalStorageData();
+      const updatedTask = getLocalData.find((val: Task) => val.id === id);
+      setTask(updatedTask);
+    }
+  }, [id]);
+
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+      }}
+    >
+      <Button onClick={() => router.push("/")}>Home</Button>
       <Box
         component="form"
-        sx={{
-          "& .MuiTextField-root": { m: 1, width: "25ch" },
-        }}
         noValidate
         autoComplete="off"
         onSubmit={handleSubmit}
+        sx={{
+          width: "400px",
+          p: 2,
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+          textAlign: "center",
+        }}
       >
         <div>
           <TextField
@@ -113,9 +139,12 @@ const TaskForm = ({ handleTask }: TaskFormProps) => {
             onChange={handleChange}
             value={task.name}
             error={taskError.name}
-            id="outlined-error"
+            id="outlined-error-helper-text"
             label="TaskName"
-            helperText={taskError.name && "Incorrect entry."}
+            helperText={taskError.name && "require."}
+            sx={{
+              width: 150,
+            }}
           />
           <TextField
             name="contributorName"
@@ -124,7 +153,10 @@ const TaskForm = ({ handleTask }: TaskFormProps) => {
             error={taskError.contributorName}
             id="outlined-error-helper-text"
             label="contributorName"
-            helperText={taskError.contributorName && "Incorrect entry."}
+            helperText={taskError.contributorName && "require."}
+            sx={{
+              width: 150,
+            }}
           />
         </div>
 
@@ -162,15 +194,26 @@ const TaskForm = ({ handleTask }: TaskFormProps) => {
         </div>
 
         <div>
-          <input type="file" name="logo" />
+          <FormControl>
+            <input type="file" onChange={handleFileChange} accept="image/*" />
+            {taskError.logo && (
+              <FormHelperText
+                sx={{
+                  color: "red",
+                  fontSize: 10,
+                }}
+              >
+                logo missing
+              </FormHelperText>
+            )}
+          </FormControl>
           <Button type="submit" variant="contained">
             Submit
           </Button>
         </div>
       </Box>
-    </>
+    </Box>
   );
 };
 
 export default TaskForm;
-

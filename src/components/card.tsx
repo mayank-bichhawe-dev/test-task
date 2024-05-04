@@ -5,21 +5,31 @@ import CardContent from "@mui/material/CardContent";
 import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
 import { red } from "@mui/material/colors";
-import { Box } from "@mui/material";
-import { Task } from "./TaskForm";
+import { Box, Grid } from "@mui/material";
+import { useRouter } from 'next/navigation'
+import { formatDistanceToNow } from 'date-fns';
+import { Task } from "@/interface/task";
 
 interface CardProps {
     task: Task
 }
 
 export default function TaskCard({ task }: CardProps) {
+  const router = useRouter();
+
+  const openEditTaskForm=(id: number)=>{
+    router.push(`edit-task/${id}`)
+  }
+
   return (
-    <Card sx={{ height: 150, width: 150 }}>
+    <Grid item key={task.id} xs={12} sm={4} md={4} style={{ display: 'flex', justifyContent: 'center' }}>
+    <Card onClick={()=> openEditTaskForm(task.id)} sx={{ height: 150, width: 180 }}>
       <CardHeader
         avatar={
           <Avatar
             sx={{ bgcolor: red[500], width: 20, height: 20 }}
             aria-label="recipe"
+            src={task.logo}
           >
             R
           </Avatar>
@@ -46,9 +56,10 @@ export default function TaskCard({ task }: CardProps) {
           }}
         >
           <Typography fontSize={10}>{task.status}</Typography>
-          <Typography fontSize={10}>{task.lastUpdatedAt} hours</Typography>
+          <Typography fontSize={10}>{formatDistanceToNow(task.lastUpdatedAt, { addSuffix: true })}</Typography>
         </Box>
       </CardContent>
     </Card>
+    </Grid>
   );
 }
