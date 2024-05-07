@@ -23,11 +23,11 @@ export default function TaskCard({ task }: CardProps) {
 
   return (
     <Grid item key={task.id} xs={12} sm={4} md={4} style={{ display: 'flex', justifyContent: 'center' }}>
-    <Card onClick={()=> openEditTaskForm(task.id)} sx={{ height: 150, width: 180 }}>
+    <Card onClick={()=> openEditTaskForm(task.id)} sx={{ height: '100%', width: '90%' }}>
       <CardHeader
         avatar={
           <Avatar
-            sx={{ bgcolor: red[500], width: 20, height: 20 }}
+            sx={{ bgcolor: red[500], width: 70, height: 70 }}
             aria-label="recipe"
             src={task.logo}
           >
@@ -35,7 +35,7 @@ export default function TaskCard({ task }: CardProps) {
           </Avatar>
         }
         title={
-          <Typography fontSize={10} sx={{ float: "right" }}>
+          <Typography variant="h4" sx={{ float: "right" }}>
             {task.visibility ? 'public': 'private'}
           </Typography>
         }
@@ -43,8 +43,8 @@ export default function TaskCard({ task }: CardProps) {
 
       <CardContent>
         <Box>
-          <Typography fontSize={10} marginBottom={1}>Name: {task.name}</Typography>
-          <Typography fontSize={10}>contributor: {task.contributorName}</Typography>
+          <Typography variant="h5" marginBottom={1}>Name: {task.name}</Typography>
+          <Typography variant="h5">contributor: {task.contributorName}</Typography>
         </Box>
 
         <Box
@@ -55,8 +55,8 @@ export default function TaskCard({ task }: CardProps) {
             marginTop: 3,
           }}
         >
-          <Typography fontSize={10}>{task.status}</Typography>
-          <Typography fontSize={10}>{formatDistanceToNow(task.lastUpdatedAt, { addSuffix: true })}</Typography>
+          <Typography variant="h5">{task.status}</Typography>
+          <Typography variant="h5">{formatDistanceToNow(task.lastUpdatedAt, { addSuffix: true })}</Typography>
         </Box>
       </CardContent>
     </Card>

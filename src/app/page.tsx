@@ -23,7 +23,7 @@ export default function Home() {
   return (
     <Fragment>
       <Box display="flex" justifyContent="center" marginBottom={4}>
-        <Button onClick={openTaskForm} variant="outlined">Create Task</Button>
+        <Button sx={{ fontSize: 20 }} onClick={openTaskForm} variant="outlined">Create Task</Button>
       </Box>
       <Grid container rowSpacing={4}>
         {tasks.map((val) => (

@@ -25,7 +25,7 @@ import { TaskFormProps, Task, TaskError } from "@/interface/task";
 const TaskForm = ({ id }: TaskFormProps) => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [task, setTask] = useState<Task>({
     id: 0,
     name: "",
@@ -35,7 +35,6 @@ const TaskForm = ({ id }: TaskFormProps) => {
     lastUpdatedAt: "",
     logo: "",
   });
-
 
   const [taskError, setTaskError] = useState<TaskError>({
     name: false,
@@ -141,17 +140,8 @@ const TaskForm = ({ id }: TaskFormProps) => {
   }, [id]);
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+    <Container component="main" maxWidth="md" sx={{ mt: 20}}>
+        <Box component="form" onSubmit={handleSubmit} noValidate>
           <FormControl margin="normal" fullWidth>
             <div
               style={{
@@ -162,7 +152,7 @@ const TaskForm = ({ id }: TaskFormProps) => {
             >
               <Avatar
                 onClick={handleDefaultImageClick}
-                style={{ cursor: "pointer" }}
+                sx={{ cursor: 'pointer', width: 100, height: 100 }}
               >
                 {task.logo ? (
                   <img
@@ -177,7 +167,7 @@ const TaskForm = ({ id }: TaskFormProps) => {
                     }}
                   />
                 ) : (
-                  <FolderIcon />
+                  <FolderIcon fontSize="large"/>
                 )}
               </Avatar>
               <input
@@ -250,7 +240,7 @@ const TaskForm = ({ id }: TaskFormProps) => {
             {taskError.visibility && <FormHelperText>Error</FormHelperText>}
           </FormControl>
           <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-            <Button type="submit" fullWidth variant="contained">
+            <Button sx={{ fontSize: 20 }} type="submit" fullWidth variant="contained">
               Submit
             </Button>
             <Button
@@ -258,12 +248,13 @@ const TaskForm = ({ id }: TaskFormProps) => {
               fullWidth
               variant="contained"
               color="error"
+              size="large"
+              sx={{ fontSize: 20 }}
             >
               Cancel
             </Button>
           </div>
         </Box>
-      </Box>
     </Container>
   );
 };
