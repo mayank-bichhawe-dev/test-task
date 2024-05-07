@@ -13,12 +13,19 @@ import {
   TextField,
   SelectChangeEvent,
 } from "@mui/material";
-import { useState, FormEvent, ChangeEvent, useEffect } from "react";
+import { useState, FormEvent, ChangeEvent, useEffect, useRef } from "react";
+import * as React from "react";
+import CssBaseline from "@mui/material/CssBaseline";
+import Avatar from "@mui/material/Avatar";
+import FolderIcon from "@mui/icons-material/Folder";
+import Container from "@mui/material/Container";
 import { useRouter } from "next/navigation";
 import { TaskFormProps, Task, TaskError } from "@/interface/task";
 
 const TaskForm = ({ id }: TaskFormProps) => {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [task, setTask] = useState<Task>({
     id: 0,
     name: "",
@@ -28,6 +35,7 @@ const TaskForm = ({ id }: TaskFormProps) => {
     lastUpdatedAt: "",
     logo: "",
   });
+
 
   const [taskError, setTaskError] = useState<TaskError>({
     name: false,
@@ -58,14 +66,14 @@ const TaskForm = ({ id }: TaskFormProps) => {
 
   const handleSelectChange = (event: SelectChangeEvent<any>) => {
     const { name, value } = event.target;
-    if(name === 'visibility'){
-      setTask({ ...task, [name]: value === 'public'});
-    }else {
+    if (name === "visibility") {
+      setTask({ ...task, [name]: value === "public" });
+    } else {
       setTask({ ...task, [name]: value });
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] as File;
     const reader = new FileReader();
     reader.onload = () => {
@@ -114,6 +122,16 @@ const TaskForm = ({ id }: TaskFormProps) => {
     });
   };
 
+  const optimizeImage = (imageUrl: string) => {
+    return imageUrl;
+  };
+
+  const handleDefaultImageClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   useEffect(() => {
     if (id) {
       const getLocalData = getLocalStorageData();
@@ -123,57 +141,88 @@ const TaskForm = ({ id }: TaskFormProps) => {
   }, [id]);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-      }}
-    >
-      <Button onClick={() => router.push("/")}>Home</Button>
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
       <Box
-        component="form"
-        noValidate
-        autoComplete="off"
-        onSubmit={handleSubmit}
         sx={{
-          width: "400px",
-          p: 2,
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-          textAlign: "center",
+          marginTop: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        <div>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <FormControl margin="normal" fullWidth>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: "16px",
+              }}
+            >
+              <Avatar
+                onClick={handleDefaultImageClick}
+                style={{ cursor: "pointer" }}
+              >
+                {task.logo ? (
+                  <img
+                    src={optimizeImage(task.logo)}
+                    alt="Uploaded Image"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      objectPosition: "center",
+                    }}
+                  />
+                ) : (
+                  <FolderIcon />
+                )}
+              </Avatar>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+                accept="image/*"
+              />
+            </div>
+            {taskError.logo && (
+              <FormHelperText
+                sx={{
+                  color: "red",
+                  fontSize: 10,
+                }}
+              >
+                logo missing
+              </FormHelperText>
+            )}
+          </FormControl>
           <TextField
+            margin="normal"
             name="name"
             onChange={handleChange}
             value={task.name}
+            fullWidth
             error={taskError.name}
             id="outlined-error-helper-text"
             label="TaskName"
             helperText={taskError.name && "require."}
-            sx={{
-              width: 150,
-            }}
           />
           <TextField
+            margin="normal"
             name="contributorName"
             onChange={handleChange}
             value={task.contributorName}
             error={taskError.contributorName}
+            fullWidth
             id="outlined-error-helper-text"
             label="contributorName"
             helperText={taskError.contributorName && "require."}
-            sx={{
-              width: 150,
-            }}
           />
-        </div>
 
-        <div>
-          <FormControl sx={{ m: 1, minWidth: 120 }} error={taskError.status}>
+          <FormControl margin="normal" fullWidth error={taskError.status}>
             <InputLabel>Status</InputLabel>
             <Select
               label="Status"
@@ -187,15 +236,12 @@ const TaskForm = ({ id }: TaskFormProps) => {
             {taskError.status && <FormHelperText>Error</FormHelperText>}
           </FormControl>
 
-          <FormControl
-            sx={{ m: 1, minWidth: 120 }}
-            error={taskError.visibility}
-          >
+          <FormControl margin="normal" fullWidth error={taskError.visibility}>
             <InputLabel>Visiblity</InputLabel>
             <Select
               label="Visibility"
               name="visibility"
-              value={task.visibility ? 'public' : 'private'}
+              value={task.visibility ? "public" : "private"}
               onChange={handleSelectChange}
               renderValue={(value) => value}
             >
@@ -203,28 +249,22 @@ const TaskForm = ({ id }: TaskFormProps) => {
             </Select>
             {taskError.visibility && <FormHelperText>Error</FormHelperText>}
           </FormControl>
-        </div>
-
-        <div>
-          <FormControl>
-            <input type="file" onChange={handleFileChange} accept="image/*" />
-            {taskError.logo && (
-              <FormHelperText
-                sx={{
-                  color: "red",
-                  fontSize: 10,
-                }}
-              >
-                logo missing
-              </FormHelperText>
-            )}
-          </FormControl>
-          <Button type="submit" variant="contained">
-            Submit
-          </Button>
-        </div>
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+            <Button type="submit" fullWidth variant="contained">
+              Submit
+            </Button>
+            <Button
+              onClick={() => router.push("/")}
+              fullWidth
+              variant="contained"
+              color="error"
+            >
+              Cancel
+            </Button>
+          </div>
+        </Box>
       </Box>
-    </Box>
+    </Container>
   );
 };
 
